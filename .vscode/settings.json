@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "**/frontmatter.json": "jsonc",
+        "**/.frontmatter/config/*.json": "jsonc",
+        "*.yaml": "yaml",
+        "*.h": "c",
+        "*.astro": "astro",
+        "array": "c",
+        "*.tcc": "c",
+        "memory": "c",
+        "format": "c",
+        "istream": "c",
+        "functional": "c",
+        "tuple": "c",
+        "utility": "c",
+        "variant": "c",
+        "locale": "c"
+    }
+}
