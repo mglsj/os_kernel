@@ -1,5 +1,29 @@
 #include "../../lib/lib.h"
 
+static char to_upper_case(const char c)
+{
+    if ('a' <= c && c <= 'z')
+        return c & ~32;
+    return c;
+}
+
+static int add_extension(char *buffer, int buffer_size)
+{
+    if (buffer[buffer_size - 4] == '.' &&
+        buffer[buffer_size - 3] == 'B' &&
+        buffer[buffer_size - 2] == 'I' &&
+        buffer[buffer_size - 1] == 'N')
+    {
+        return buffer_size;
+    }
+
+    buffer[buffer_size++] = '.';
+    buffer[buffer_size++] = 'B';
+    buffer[buffer_size++] = 'I';
+    buffer[buffer_size++] = 'N';
+    return buffer_size;
+}
+
 static int read_cmd(char *buffer)
 {
     char ch[4] = {0};
@@ -34,7 +58,7 @@ static int read_cmd(char *buffer)
         }
         else
         {
-            buffer[buffer_size++] = ch[0];
+            buffer[buffer_size++] = to_upper_case(ch[0]);
             printf("%s", ch);
         }
     }
@@ -50,13 +74,14 @@ int main(void)
 
     while (1)
     {
-        printf("\033[0;32mshell# \033[0m");
+        printf("\033[1;32mshell\033[0m:\033[1;34m/\033[0m$ ");
         memset(buffer, 0, sizeof(buffer));
         buffer_size = read_cmd(buffer);
         if (buffer_size == 0)
         {
             continue;
         }
+        buffer_size = add_extension(buffer, buffer_size);
         int fd = open_file(buffer);
         if (fd == -1)
         {

@@ -12,7 +12,7 @@
 void KMain(void)
 {
     init_uart();
-    printk("Hello from \033[0;31mRaspberry\033[0m \033[0;32mpi\033[0m\r\n");
+    printk("Hello from \033[1;31mRaspberry\033[0m \033[1;32mpi\033[0m\r\n\r\n");
 
     init_memory();
     init_fs();
