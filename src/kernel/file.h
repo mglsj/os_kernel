@@ -1,6 +1,7 @@
 #ifndef _FILE_H
 #define _FILE_H
 
+#include "stddef.h"
 #include "stdint.h"
 
 struct BPB
@@ -44,11 +45,32 @@ struct DirEntry
     uint32_t file_size;
 } __attribute__((packed));
 
+struct FCB
+{
+    char name[8];
+    char ext[3];
+    uint32_t cluster_index;
+    uint32_t dir_index;
+    uint32_t file_size;
+    int count;
+};
+
+struct FileDesc
+{
+    struct FCB *fcb;
+    uint32_t position;
+};
+
 #define FS_BASE P2V(0x30000000)
 #define ENTRY_EMPTY 0
 #define ENTRY_DELETED 0xe5
 
+struct Process;
+
 void init_fs(void);
-int load_file(char *path, uint64_t addr);
+int open_file(struct Process *proc, char *path_name);
+void close_file(struct Process *proc, int fd);
+uint32_t get_file_size(struct Process *process, int fd);
+uint32_t read_file(struct Process *process, int fd, void *buffer, uint32_t size);
 
 #endif

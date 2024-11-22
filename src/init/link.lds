@@ -17,6 +17,10 @@ SECTIONS
     }
 
     .bss : {
+        bss_start = .;
         *(.bss)
+        bss_end = .;
     }
+
+    end = .;
 }

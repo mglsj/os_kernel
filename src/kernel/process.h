@@ -14,6 +14,7 @@ struct Process
 	uint64_t context;
 	uint64_t page_map;
 	uint64_t stack;
+	struct FileDesc *file[100];
 	struct TrapFrame *tf;
 };
 

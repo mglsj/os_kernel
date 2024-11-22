@@ -3,6 +3,7 @@
 #include "file.h"
 #include "lib.h"
 #include "print.h"
+#include "process.h"
 #include "stdbool.h"
 #include "stddef.h"
 
@@ -210,9 +211,10 @@ void free_vm(uint64_t map)
     free_pgd(map);
 }
 
-bool setup_uvm(uint64_t map, char *file_name)
+bool setup_uvm(struct Process *process, char *file_name)
 {
     bool status = false;
+    uint64_t map = process->page_map;
     void *page = kalloc();
 
     if (page != NULL)
@@ -222,11 +224,20 @@ bool setup_uvm(uint64_t map, char *file_name)
 
         if (status == true)
         {
-            if (load_file(file_name, (uint64_t)page) == -1)
+            int fd = open_file(process, file_name);
+            if (fd == -1)
             {
                 free_vm(map);
                 return false;
             }
+            uint32_t size = get_file_size(process, fd);
+            if (read_file(process, fd, page, size) != size)
+            {
+                free_vm(map);
+                return false;
+            }
+
+            close_file(process, fd);
         }
         else
         {
