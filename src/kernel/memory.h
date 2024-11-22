@@ -1,8 +1,9 @@
 #ifndef _MEMORY_H
 #define _MEMORY_H
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "process.h"
+#include "stdbool.h"
+#include "stdint.h"
 
 struct Page
 {
@@ -35,12 +36,10 @@ void kfree(uint64_t v);
 void init_memory(void);
 bool map_page(uint64_t map, uint64_t v, uint64_t pa, uint64_t attribute);
 void switch_vm(uint64_t map);
-
-struct Process;
-
 bool setup_uvm(struct Process *process, char *file_name);
 void free_page(uint64_t map, uint64_t vstart);
 void free_vm(uint64_t map);
 uint64_t read_pgd(void);
+bool copy_uvm(uint64_t dst_map, uint64_t src_map, int size);
 
 #endif

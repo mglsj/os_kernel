@@ -7,6 +7,10 @@
 .global close_file
 .global get_file_size
 .global read_file
+.global fork
+.global exec
+.global keyboard_read
+.global read_root_directory
 
 writeu:
     sub sp, sp, #16
@@ -25,6 +29,7 @@ sleepu:
     mov x8, #1
 
     str x0, [sp]
+
     mov x0, #1
     mov x1, sp
     svc #1234
@@ -34,8 +39,8 @@ sleepu:
 
 exitu:
     mov x8, #2
-
     mov x0, #0
+
     svc #1234
 
     ret
@@ -47,6 +52,7 @@ waitu:
     str x0, [sp]
     mov x0, #1
     mov x1, sp
+
     svc #1234
 
     add sp, sp, #8
@@ -59,6 +65,7 @@ open_file:
     str x0, [sp]
     mov x0, #1
     mov x1, sp
+
     svc #1234
 
     add sp, sp, #8
@@ -71,6 +78,7 @@ close_file:
     str x0, [sp]
     mov x0, #1
     mov x1, sp
+
     svc #1234
 
     add sp, sp, #8
@@ -81,9 +89,9 @@ get_file_size:
     mov x8, #6
 
     str x0, [sp]
-    
     mov x0, #1
     mov x1, sp
+
     svc #1234
 
     add sp, sp, #8
@@ -96,9 +104,50 @@ read_file:
     stp x0, x1, [sp]
     str x2, [sp, #16]
 
-    mov x0, #1
+    mov x0, #3
     mov x1, sp
+
     svc #1234
 
     add sp, sp, #24
+    ret
+
+fork:
+    mov x8, #8
+    mov x0, #0
+
+    svc #1234
+    ret
+
+exec:
+    sub sp, sp, #8
+    mov x8, #9
+
+    str x0, [sp]
+    mov x0, #1
+    mov x1, sp
+
+    svc #1234
+
+    add sp, sp, #8
+    ret
+
+keyboard_read:
+    mov x8, #10
+    mov x0, #0
+
+    svc #1234
+    ret
+
+read_root_directory:
+    sub sp, sp, #8
+    mov x8, #11
+
+    str x0, [sp]
+    mov x0, #1
+    mov x1, sp
+
+    svc #1234
+
+    add sp, sp, #8
     ret

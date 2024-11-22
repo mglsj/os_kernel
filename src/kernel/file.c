@@ -159,7 +159,7 @@ static uint32_t search_file(char *path)
 
 static uint32_t read_raw_data(uint32_t cluster_index, char *buffer, uint32_t position, uint32_t size)
 {
-    struct BPB *bpb = get_fs_bpb();
+    struct BPB *bpb;
     char *data;
     uint32_t read_size = 0;
     uint32_t cluster_size = get_cluster_size();
@@ -173,11 +173,12 @@ static uint32_t read_raw_data(uint32_t cluster_index, char *buffer, uint32_t pos
         ASSERT(index < 0xfff7);
     }
 
+    bpb = get_fs_bpb();
+
     if (offset != 0)
     {
-        read_size = (offset + size) <= cluster_index ? size : (cluster_size - offset);
+        read_size = (offset + size) <= cluster_size ? size : (cluster_size - offset);
         data = (char *)(get_cluster_offset(index) + (uint64_t)bpb);
-
         memcpy(buffer, data + offset, read_size);
         buffer += read_size;
         index = get_cluster_value(index);
@@ -235,6 +236,7 @@ static uint32_t get_fcb(uint32_t index)
     }
 
     fcb_table[index].count++;
+
     return index;
 }
 
@@ -248,8 +250,8 @@ int open_file(struct Process *proc, char *path_name)
     int fd = -1;
     int file_desc_index = -1;
     uint32_t entry_index;
-
     uint32_t fcb_index;
+
     for (int i = 0; i < 100; i++)
     {
         if (proc->file[i] == NULL)
@@ -258,6 +260,7 @@ int open_file(struct Process *proc, char *path_name)
             break;
         }
     }
+
     if (fd == -1)
     {
         return -1;
@@ -278,16 +281,16 @@ int open_file(struct Process *proc, char *path_name)
     }
 
     entry_index = search_file(path_name);
-    if (entry_index == 0xffffff)
+    if (entry_index == 0xffffffff)
     {
         return -1;
     }
 
     fcb_index = get_fcb(entry_index);
-    memset(&(file_desc_table[file_desc_index]), 0, sizeof(struct FileDesc));
+    memset(&file_desc_table[file_desc_index], 0, sizeof(struct FileDesc));
     file_desc_table[file_desc_index].fcb = &fcb_table[fcb_index];
-
-    proc->file[fd] = &(file_desc_table[file_desc_index]);
+    file_desc_table[file_desc_index].count = 1;
+    proc->file[fd] = &file_desc_table[file_desc_index];
 
     return fd;
 }
@@ -301,17 +304,35 @@ static void put_fcb(struct FCB *fcb)
 void close_file(struct Process *proc, int fd)
 {
     put_fcb(proc->file[fd]->fcb);
-    proc->file[fd]->fcb = NULL;
+    proc->file[fd]->count--;
+
+    if (proc->file[fd]->count == 0)
+    {
+        proc->file[fd]->fcb = NULL;
+    }
+
     proc->file[fd] = NULL;
+}
+
+int read_root_directory(char *buffer)
+{
+    struct DirEntry *dir_entry = get_root_directory();
+    uint32_t count = get_root_directory_count();
+
+    memcpy(buffer, dir_entry, count * sizeof(struct DirEntry));
+    return count;
 }
 
 static bool init_fcb(void)
 {
     fcb_table = (struct FCB *)kalloc();
     if (fcb_table == NULL)
+    {
         return false;
+    }
 
     memset(fcb_table, 0, PAGE_SIZE);
+
     return true;
 }
 
@@ -319,9 +340,12 @@ static bool init_file_desc(void)
 {
     file_desc_table = (struct FileDesc *)kalloc();
     if (file_desc_table == NULL)
+    {
         return false;
+    }
 
-    memset(fcb_table, 0, PAGE_SIZE);
+    memset(file_desc_table, 0, PAGE_SIZE);
+
     return true;
 }
 

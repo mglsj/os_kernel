@@ -1,40 +1,7 @@
-#include "lib.h"
 #include "stdarg.h"
 #include "stdint.h"
 
-static int read_string(char *buffer, int position, const char *string)
-{
-    int index = 0;
-
-    for (index = 0; string[index] != '\0'; index++)
-    {
-        buffer[position++] = string[index];
-    }
-
-    return index;
-}
-
-static int hex_to_string(char *buffer, int position, uint64_t digits)
-{
-    char digits_buffer[25];
-    char digits_map[16] = "0123456789ABCDEF";
-    int size = 0;
-
-    do
-    {
-        digits_buffer[size++] = digits_map[digits % 16];
-        digits /= 16;
-    } while (digits != 0);
-
-    for (int i = size - 1; i >= 0; i--)
-    {
-        buffer[position++] = digits_buffer[i];
-    }
-
-    buffer[position++] = 'H';
-
-    return size + 1;
-}
+extern int writeu(char *buffer, int buffer_size);
 
 static int udecimal_to_string(char *buffer, int position, uint64_t digits)
 {
@@ -69,6 +36,40 @@ static int decimal_to_string(char *buffer, int position, int64_t digits)
 
     size += udecimal_to_string(buffer, position, (uint64_t)digits);
     return size;
+}
+
+static int hex_to_string(char *buffer, int position, uint64_t digits)
+{
+    char digits_buffer[25];
+    char digits_map[16] = "0123456789ABCDEF";
+    int size = 0;
+
+    do
+    {
+        digits_buffer[size++] = digits_map[digits % 16];
+        digits /= 16;
+    } while (digits != 0);
+
+    for (int i = size - 1; i >= 0; i--)
+    {
+        buffer[position++] = digits_buffer[i];
+    }
+
+    buffer[position++] = 'H';
+
+    return size + 1;
+}
+
+static int read_string(char *buffer, int position, const char *string)
+{
+    int index = 0;
+
+    for (index = 0; string[index] != '\0'; index++)
+    {
+        buffer[position++] = string[index];
+    }
+
+    return index;
 }
 
 int printf(const char *format, ...)
@@ -118,7 +119,7 @@ int printf(const char *format, ...)
         }
     }
 
-    writeu(buffer, buffer_size);
+    buffer_size = writeu(buffer, buffer_size);
     va_end(args);
 
     return buffer_size;

@@ -3,7 +3,6 @@
 #include "file.h"
 #include "lib.h"
 #include "print.h"
-#include "process.h"
 #include "stdbool.h"
 #include "stddef.h"
 
@@ -230,7 +229,9 @@ bool setup_uvm(struct Process *process, char *file_name)
                 free_vm(map);
                 return false;
             }
+
             uint32_t size = get_file_size(process, fd);
+
             if (read_file(process, fd, page, size) != size)
             {
                 free_vm(map);
@@ -243,6 +244,44 @@ bool setup_uvm(struct Process *process, char *file_name)
         {
             kfree((uint64_t)page);
             free_vm(map);
+        }
+    }
+
+    return status;
+}
+
+bool copy_uvm(uint64_t dst_map, uint64_t src_map, int size)
+{
+    bool status = false;
+    unsigned int index;
+    uint64_t *pd = NULL;
+    uint64_t start;
+
+    void *page = kalloc();
+
+    if (page != NULL)
+    {
+        memset(page, 0, PAGE_SIZE);
+        status = map_page(dst_map, 0x400000, V2P(page), ENTRY_V | USER | NORMAL_MEMORY | ENTRY_ACCESSED);
+
+        if (status == true)
+        {
+            pd = find_pud_entry(src_map, 0x400000, 0, 0);
+            if (pd == NULL)
+            {
+                free_vm(dst_map);
+                return false;
+            }
+
+            index = (0x400000U >> 21) & 0x1FF;
+            ASSERT((pd[index] & ENTRY_V) == 1);
+            start = P2V(PTE_ADDR(pd[index]));
+            memcpy(page, (void *)start, size);
+        }
+        else
+        {
+            kfree((uint64_t)page);
+            free_vm(dst_map);
         }
     }
 

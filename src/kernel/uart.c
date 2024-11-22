@@ -1,4 +1,5 @@
 #include "uart.h"
+#include "keyboard.h"
 #include "lib.h"
 
 void write_char(unsigned char c)
@@ -28,17 +29,7 @@ void uart_handler(void)
 
     if (status & (1 << 4))
     {
-        char ch = read_char();
-
-        if (ch == '\r')
-        {
-            write_string("\r\n");
-        }
-        else
-        {
-            write_char(ch);
-        }
-
+        keyboard_handler();
         out_word(UART0_ICR, (1 << 4));
     }
 }

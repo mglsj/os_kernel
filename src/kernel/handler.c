@@ -64,12 +64,31 @@ void handler(struct TrapFrame *tf)
         if ((tf->spsr & 0xf) == 0)
         {
             process_control = get_pc();
-            printk("sync error occurs in process: %d\r\n", process_control->current_process->pid);
+            printk("sync error occurs in process %d\r\n", (int64_t)process_control->current_process->pid);
             exit();
         }
         else
         {
+            printk("\r\n");
             printk("sync error at %x: %x\r\n", tf->elr, tf->esr);
+            printk("Registers: \r\n");
+            printk("x0:\t%x\tx1:\t%x\r\n", tf->x0, tf->x1);
+            printk("x2:\t%x\tx3:\t%x\r\n", tf->x2, tf->x3);
+            printk("x4:\t%x\tx5:\t%x\r\n", tf->x4, tf->x5);
+            printk("x6:\t%x\tx7:\t%x\r\n", tf->x6, tf->x7);
+            printk("x8:\t%x\tx9:\t%x\r\n", tf->x8, tf->x9);
+            printk("x10:\t%x\tx11:\t%x\r\n", tf->x10, tf->x11);
+            printk("x12:\t%x\tx13:\t%x\r\n", tf->x12, tf->x13);
+            printk("x14:\t%x\tx15:\t%x\r\n", tf->x14, tf->x15);
+            printk("x16:\t%x\tx17:\t%x\r\n", tf->x16, tf->x17);
+            printk("x18:\t%x\tx19:\t%x\r\n", tf->x18, tf->x19);
+            printk("x20:\t%x\tx21:\t%x\r\n", tf->x20, tf->x21);
+            printk("x22:\t%x\tx23:\t%x\r\n", tf->x22, tf->x23);
+            printk("x24:\t%x\tx25:\t%x\r\n", tf->x24, tf->x25);
+            printk("x26:\t%x\tx27:\t%x\r\n", tf->x26, tf->x27);
+            printk("x28:\t%x\tx29:\t%x\r\n", tf->x28, tf->x29);
+            printk("x30:\t%x\r\n", tf->x30);
+            printk("\r\n");
             while (1)
             {
             }
@@ -99,9 +118,11 @@ void handler(struct TrapFrame *tf)
             }
         }
         break;
+
     case 3:
         system_call(tf);
         break;
+
     default:
         printk("unknown exception\r\n");
         while (1)

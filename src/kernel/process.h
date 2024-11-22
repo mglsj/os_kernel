@@ -44,5 +44,7 @@ void sleep(int wait);
 void wake_up(int wait);
 void exit(void);
 void wait(int pid);
+int fork(void);
+int exec(struct Process *process, char *name);
 
 #endif

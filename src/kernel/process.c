@@ -50,11 +50,13 @@ static struct Process *alloc_new_process(void)
     struct Process *process;
 
     process = find_unused_process();
-    ASSERT(process == &process_table[1]);
+    if (process == NULL)
+    {
+        return NULL;
+    }
 
     process->stack = (uint64_t)kalloc();
     ASSERT(process->stack != 0);
-
     memset((void *)process->stack, 0, PAGE_SIZE);
 
     process->state = PROC_INIT;
@@ -62,7 +64,6 @@ static struct Process *alloc_new_process(void)
 
     process->context = process->stack + PAGE_SIZE - sizeof(struct TrapFrame) - 12 * 8;
     *(uint64_t *)(process->context + 11 * 8) = (uint64_t)trap_return;
-
     process->tf = (struct TrapFrame *)(process->stack + PAGE_SIZE - sizeof(struct TrapFrame));
     process->tf->elr = 0x400000;
     process->tf->sp0 = 0x400000 + PAGE_SIZE;
@@ -70,7 +71,6 @@ static struct Process *alloc_new_process(void)
 
     process->page_map = (uint64_t)kalloc();
     ASSERT(process->page_map != 0);
-
     memset((void *)process->page_map, 0, PAGE_SIZE);
 
     return process;
@@ -88,7 +88,7 @@ static void init_user_process(void)
     ASSERT(setup_uvm(process, "INIT.BIN"));
 
     process_control = get_pc();
-    list = &(process_control->ready_list);
+    list = &process_control->ready_list;
 
     process->state = PROC_READY;
     append_list_tail(list, (struct List *)process);
@@ -100,8 +100,7 @@ void init_process(void)
     init_user_process();
 }
 
-static void switch_process(struct Process *prev,
-                           struct Process *current)
+static void switch_process(struct Process *prev, struct Process *current)
 {
     switch_vm(current->page_map);
     swap(&prev->context, current->context);
@@ -115,7 +114,7 @@ static void schedule(void)
     struct HeadList *list;
 
     process_control = get_pc();
-    list = &(process_control->ready_list);
+    list = &process_control->ready_list;
     prev_proc = process_control->current_process;
 
     if (is_list_empty(list))
@@ -126,6 +125,7 @@ static void schedule(void)
     {
         current_proc = (struct Process *)remove_list_head(list);
     }
+
     current_proc->state = PROC_RUNNING;
     process_control->current_process = current_proc;
 
@@ -139,7 +139,7 @@ void yield(void)
     struct HeadList *list;
 
     process_control = get_pc();
-    list = &(process_control->ready_list);
+    list = &process_control->ready_list;
 
     if (is_list_empty(list))
     {
@@ -164,7 +164,6 @@ void sleep(int wait)
 
     process_control = get_pc();
     process = process_control->current_process;
-
     process->state = PROC_SLEEP;
     process->wait = wait;
 
@@ -180,9 +179,8 @@ void wake_up(int wait)
     struct HeadList *wait_list;
 
     process_control = get_pc();
-    process = process_control->current_process;
-    ready_list = &(process_control->ready_list);
-    wait_list = &(process_control->wait_list);
+    ready_list = &process_control->ready_list;
+    wait_list = &process_control->wait_list;
 
     process = (struct Process *)remove_list(wait_list, wait);
 
@@ -201,7 +199,6 @@ void exit(void)
 
     process_control = get_pc();
     process = process_control->current_process;
-
     process->state = PROC_KILLED;
     process->wait = process->pid;
 
@@ -218,7 +215,7 @@ void wait(int pid)
     struct HeadList *list;
 
     process_control = get_pc();
-    list = &(process_control->kill_list);
+    list = &process_control->kill_list;
 
     while (1)
     {
@@ -230,10 +227,98 @@ void wait(int pid)
                 ASSERT(process->state == PROC_KILLED);
                 kfree(process->stack);
                 free_vm(process->page_map);
+
+                for (int i = 0; i < 100; i++)
+                {
+                    if (process->file[i] != NULL)
+                    {
+                        process->file[i]->fcb->count--;
+                        process->file[i]->count--;
+
+                        if (process->file[i]->count == 0)
+                        {
+                            process->file[i]->fcb = NULL;
+                        }
+                    }
+                }
+
                 memset(process, 0, sizeof(struct Process));
                 break;
             }
         }
+
         sleep(-3);
     }
+}
+
+int fork(void)
+{
+    struct ProcessControl *process_control;
+    struct Process *process;
+    struct Process *current_process;
+    struct HeadList *list;
+
+    process_control = get_pc();
+    current_process = process_control->current_process;
+    list = &process_control->ready_list;
+
+    process = alloc_new_process();
+    if (process == NULL)
+    {
+        ASSERT(0);
+        return -1;
+    }
+
+    if (copy_uvm(process->page_map, current_process->page_map, PAGE_SIZE) == false)
+    {
+        ASSERT(0);
+        return -1;
+    }
+
+    memcpy(process->file, current_process->file, 100 * sizeof(struct FileDesc *));
+
+    for (int i = 0; i < 100; i++)
+    {
+        if (process->file[i] != NULL)
+        {
+            process->file[i]->count++;
+            process->file[i]->fcb->count++;
+        }
+    }
+
+    memcpy(process->tf, current_process->tf, sizeof(struct TrapFrame));
+    process->tf->x0 = 0;
+    process->state = PROC_READY;
+    append_list_tail(list, (struct List *)process);
+
+    return process->pid;
+}
+
+int exec(struct Process *process, char *name)
+{
+    int fd;
+    uint32_t size;
+
+    fd = open_file(process, name);
+    if (fd == -1)
+    {
+        exit();
+    }
+
+    memset((void *)0x400000, 0, PAGE_SIZE);
+    size = get_file_size(process, fd);
+    size = read_file(process, fd, (void *)0x400000, size);
+    if (size == 0xffffffff)
+    {
+        exit();
+    }
+
+    close_file(process, fd);
+
+    memset(process->tf, 0, sizeof(struct TrapFrame));
+    process->tf->elr = 0x400000;
+    process->tf->sp0 = 0x400000 + PAGE_SIZE;
+    process->tf->spsr = 0;
+
+    return 0;
 }

@@ -4,7 +4,6 @@
 #include "handler.h"
 
 typedef int (*SYSTEMCALL)(int64_t *argptr);
-
 void init_system_call(void);
 void system_call(struct TrapFrame *tf);
 

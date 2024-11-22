@@ -58,15 +58,14 @@
 
 .section .text
 .global vector_table
-.global enable_irq
-
 .global enable_timer
 .global read_timer_freq
 .global read_timer_status
 .global set_timer_interval
-
-.global swap
+.global enable_irq
 .global trap_return
+.global pstart
+.global swap
 
 .balign 0x800
 vector_table:
@@ -142,31 +141,25 @@ trap_return:
     msr spsr_el1, x1
     kernel_exit
 
-
 sync_handler:
     kernel_entry
-    
     mrs x0, esr_el1
     lsr x1, x0, #26
     cmp x1, #0b010101
     mov x2, #1
     mov x3, #3
     csel x0, x2, x3, ne
-
     handler_entry
-    b trap_return
 
 irq_handler:
     kernel_entry
     mov x0, #2
     handler_entry
-    b trap_return
 
 error:
     kernel_entry
     mov x0, #0
     handler_entry
-    b trap_return
 
 read_timer_freq:
     mrs x0, CNTFRQ_EL0
@@ -199,24 +192,25 @@ enable_irq:
     ret
 
 swap:
-    sub sp, sp, #(12*8)
-    stp x19, x20, [sp, #(16 * 0)]
-    stp x21, x22, [sp, #(16 * 1)]
-    stp x23, x24, [sp, #(16 * 2)]
-    stp x25, x26, [sp, #(16 * 3)]
-    stp x27, x28, [sp, #(16 * 4)]
-    stp x29, x30, [sp, #(16 * 5)]
+    sub	sp,  sp,  #(12 * 8)
+	stp	x19, x20, [sp, #(16 * 0)]
+	stp	x21, x22, [sp, #(16 * 1)]
+	stp	x23, x24, [sp, #(16 * 2)]
+	stp	x25, x26, [sp, #(16 * 3)]
+	stp	x27, x28, [sp, #(16 * 4)]
+	stp	x29, x30, [sp, #(16 * 5)]
 
     mov x2, sp
     str x2, [x0]
     mov sp, x1
 
-    ldp x19, x20, [sp, #(16 * 0)]
-    ldp x21, x22, [sp, #(16 * 1)]
-    ldp x23, x24, [sp, #(16 * 2)]
-    ldp x25, x26, [sp, #(16 * 3)]
-    ldp x27, x28, [sp, #(16 * 4)]
-    ldp x29, x30, [sp, #(16 * 5)]
-    add sp, sp, #(12*8)
+    ldp	x19, x20, [sp, #(16 * 0)]
+	ldp	x21, x22, [sp, #(16 * 1)]
+	ldp	x23, x24, [sp, #(16 * 2)]
+	ldp	x25, x26, [sp, #(16 * 3)]
+	ldp	x27, x28, [sp, #(16 * 4)]
+	ldp	x29, x30, [sp, #(16 * 5)]
+    add sp,  sp,  #(12 * 8)
 
     ret
+    
