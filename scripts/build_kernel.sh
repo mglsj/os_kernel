@@ -26,9 +26,9 @@ aarch64-linux-gnu-gcc -std=c99 -ffreestanding -mgeneral-regs-only -c src/kernel/
 aarch64-linux-gnu-gcc -std=c99 -ffreestanding -mgeneral-regs-only -c src/kernel/keyboard.c -o build/kernel/keyboard.o
 
 echo "[DEBUG] Compiling GPU"
-# aarch64-linux-gnu-gcc -std=c99 -Wall -O2 -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only -c src/kernel/gpu/delays.c -o build/kernel/gpu/delays.o
-# aarch64-linux-gnu-gcc -std=c99 -Wall -O2 -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only -c src/kernel/gpu/lfb.c -o build/kernel/gpu/lfb.o
-# aarch64-linux-gnu-gcc -std=c99 -Wall -O2 -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only -c src/kernel/gpu/mbox.c -o build/kernel/gpu/mbox.o
+aarch64-linux-gnu-gcc -std=c99 -Wall -O2 -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only -c src/kernel/gpu/delays.c -o build/kernel/gpu/delays.o
+aarch64-linux-gnu-gcc -std=c99 -Wall -O2 -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only -c src/kernel/gpu/lfb.c -o build/kernel/gpu/lfb.o
+aarch64-linux-gnu-gcc -std=c99 -Wall -O2 -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only -c src/kernel/gpu/mbox.c -o build/kernel/gpu/mbox.o
 
 echo "[DEBUG] Linking Kernel"
 # Link all the files
@@ -48,10 +48,10 @@ aarch64-linux-gnu-ld -nostdlib -T src/kernel/link.lds \
     build/kernel/process.o \
     build/kernel/syscall.o \
     build/kernel/lib.o \
-    build/kernel/keyboard.o
-# build/kernel/gpu/delays.o \
-# build/kernel/gpu/lfb.o \
-# build/kernel/gpu/mbox.o
+    build/kernel/keyboard.o \
+    build/kernel/gpu/delays.o \
+    build/kernel/gpu/lfb.o \
+    build/kernel/gpu/mbox.o
 
 echo "[DEBUG] Converting Kernel"
 # Convert the linked file to binary

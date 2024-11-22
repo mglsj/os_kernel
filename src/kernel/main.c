@@ -9,6 +9,8 @@
 #include "syscall.h"
 #include "uart.h"
 
+#include "gpu/lfb.h"
+
 void KMain(void)
 {
     init_uart();
@@ -21,4 +23,7 @@ void KMain(void)
     init_interrupt_controller();
     init_process();
     enable_irq();
+
+    lfb_init();
+    lfb_showpicture_gato();
 }
