@@ -12,8 +12,7 @@
 void KMain(void)
 {
     init_uart();
-    printk("Hello, Raspberry pi\r\n");
-    printk("We are at EL %u\r\n", (uint64_t)get_el());
+    printk("Hello from \033[0;31mRaspberry\033[0m \033[0;32mpi\033[0m\r\n");
 
     init_memory();
     init_fs();
