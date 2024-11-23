@@ -26,9 +26,21 @@ aarch64-linux-gnu-gcc -std=c99 -ffreestanding -mgeneral-regs-only -c src/kernel/
 aarch64-linux-gnu-gcc -std=c99 -ffreestanding -mgeneral-regs-only -c src/kernel/keyboard.c -o build/kernel/keyboard.o
 
 echo "[DEBUG] Compiling GPU"
-aarch64-linux-gnu-gcc -std=c99 -Wall -O2 -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only -c src/kernel/gpu/delays.c -o build/kernel/gpu/delays.o
-aarch64-linux-gnu-gcc -std=c99 -Wall -O2 -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only -c src/kernel/gpu/lfb.c -o build/kernel/gpu/lfb.o
-aarch64-linux-gnu-gcc -std=c99 -Wall -O2 -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only -c src/kernel/gpu/mbox.c -o build/kernel/gpu/mbox.o
+aarch64-linux-gnu-gcc -std=c99 -Wall -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only \
+    -c src/kernel/gpu/delays.c \
+    -o build/kernel/gpu/delays.o
+aarch64-linux-gnu-gcc -std=c99 -Wall -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only \
+    -c src/kernel/gpu/video.c \
+    -o build/kernel/gpu/video.o
+aarch64-linux-gnu-gcc -std=c99 -Wall -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only \
+    -c src/kernel/gpu/mailbox.c \
+    -o build/kernel/gpu/mailbox.o
+aarch64-linux-gnu-gcc -std=c99 -Wall -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only \
+    -c src/kernel/gpu/fontData.c \
+    -o build/kernel/gpu/fontData.o
+aarch64-linux-gnu-gcc -std=c99 -Wall -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only \
+    -c src/kernel/gpu/dma.c \
+    -o build/kernel/gpu/dma.o
 
 echo "[DEBUG] Linking Kernel"
 # Link all the files
@@ -50,13 +62,25 @@ aarch64-linux-gnu-ld -nostdlib -T src/kernel/link.lds \
     build/kernel/lib.o \
     build/kernel/keyboard.o \
     build/kernel/gpu/delays.o \
-    build/kernel/gpu/lfb.o \
-    build/kernel/gpu/mbox.o
+    build/kernel/gpu/video.o \
+    build/kernel/gpu/mailbox.o \
+    build/kernel/gpu/fontData.o \
+    build/kernel/gpu/dma.o
 
 echo "[DEBUG] Converting Kernel"
 # Convert the linked file to binary
 aarch64-linux-gnu-objcopy -O binary build/kernel/kernel build/kernel8.img
 
-echo "[DEBUG] Appending filesystem to kernel"
-# Append filesystem image to the kernel
-dd bs=16MB if=build/programs/os.img >>build/kernel8.img
+echo "[DEBUG] Padding Kernel"
+# Get the size of the binary image
+size=$(stat -c%s "build/kernel8.img")
+
+# Calculate the padding needed to align to 16 bytes
+padding=$(((16 - (size % 16)) % 16))
+
+# Add the padding to the binary image
+if [ $padding -ne 0 ]; then
+    dd if=/dev/zero bs=1 count=$padding >>build/kernel8.img
+fi
+
+source scripts/append_file_system.sh

@@ -38,7 +38,7 @@ el1_entry:
     bl enable_mmu
 
     ldr x0, =FS_BASE
-    ldr x1, =bss_start
+    ldr x1, =fs_start
     ldr x2, =FS_SIZE
     bl memcpy
 

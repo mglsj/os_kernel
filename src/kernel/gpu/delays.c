@@ -18,7 +18,7 @@ void wait_cycles(unsigned int n)
 /**
  * Wait N microsec (ARM CPU only)
  */
-void wait_msec(unsigned int n)
+void wait_micro_sec(unsigned int n)
 {
     register unsigned long f, t, r;
     // get the current counter frequency
@@ -56,7 +56,7 @@ unsigned long get_system_timer()
 /**
  * Wait N microsec (with BCM System Timer)
  */
-void wait_msec_st(unsigned int n)
+void wait_micro_sec_st(unsigned int n)
 {
     unsigned long t = get_system_timer();
     // we must check if it's non-zero, because qemu does not emulate

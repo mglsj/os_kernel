@@ -7,7 +7,9 @@
 #include "stddef.h"
 
 static struct Page free_memory;
-extern char end;
+extern char _kernel_end;
+#define end _kernel_end
+
 void load_pgd(uint64_t map);
 
 static void free_region(uint64_t v, uint64_t e)

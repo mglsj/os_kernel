@@ -9,13 +9,14 @@
 #include "syscall.h"
 #include "uart.h"
 
-#include "gpu/lfb.h"
+#include "gpu/delays.h"
+#include "gpu/mailbox.h"
+#include "gpu/video.h"
 
 void KMain(void)
 {
     init_uart();
     printk("Hello from \033[1;31mRaspberry\033[0m \033[1;32mpi\033[0m\r\n\r\n");
-
     init_memory();
     init_fs();
     init_system_call();
@@ -24,6 +25,8 @@ void KMain(void)
     init_process();
     enable_irq();
 
-    lfb_init();
-    lfb_showpicture_gato();
+    video_init();
+    video_set_dma(false);
+    video_set_resolution(1366, 769, 32);
+    video_draw_string("Hello from Raspberry Pi", 50, 50);
 }
