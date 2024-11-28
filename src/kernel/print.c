@@ -1,3 +1,4 @@
+#include "gpu/terminal.h"
 #include "stdarg.h"
 #include "stdint.h"
 #include "uart.h"
@@ -71,8 +72,18 @@ static int decimal_to_string(char *buffer, int position, int64_t digits)
     return size;
 }
 
+static int read_single_char(char *buffer, int position, const char ch)
+{
+    buffer[position++] = ch;
+    return 1;
+}
+
 void write_console(const char *buffer, int size)
 {
+    if (terminal_initialized == true)
+    {
+        terminal_print(buffer, size);
+    }
     for (int i = 0; i < size; i++)
     {
         write_char(buffer[i]);
@@ -85,6 +96,7 @@ int printk(const char *format, ...)
     int buffer_size = 0;
     int64_t integer = 0;
     char *string = 0;
+    char ch = 0;
     va_list args;
 
     va_start(args, format);
@@ -118,7 +130,10 @@ int printk(const char *format, ...)
                 string = va_arg(args, char *);
                 buffer_size += read_string(buffer, buffer_size, string);
                 break;
-
+            case 'c':
+                ch = (char)va_arg(args, int);
+                buffer_size += read_single_char(buffer, buffer_size, ch);
+                break;
             default:
                 buffer[buffer_size++] = '%';
                 i--;

@@ -7,12 +7,16 @@
 #include "syscall.h"
 #include "uart.h"
 
+#ifdef __TARGET_QEMU__
+
 void enable_timer(void);
 uint32_t read_timer_status(void);
 void set_timer_interval(uint32_t value);
 uint32_t read_timer_freq(void);
-
 static uint32_t timer_interval = 0;
+
+#endif
+
 static uint64_t ticks = 0;
 
 void init_interrupt_controller(void)
@@ -21,18 +25,31 @@ void init_interrupt_controller(void)
     out_word(DISABLE_IRQS_1, 0xffffffff);
     out_word(DISABLE_IRQS_2, 0xffffffff);
 
+#ifdef __TARGET_RPI3__
+    out_word(ENABLE_BASIC_IRQS, 1);
+#endif
+
     out_word(ENABLE_IRQS_2, (1 << 25));
 }
 
 void init_timer(void)
 {
+#ifdef __TARGET_QEMU__
     timer_interval = read_timer_freq() / 100;
     enable_timer();
     out_word(CNTP_EL0, (1 << 1));
+#endif
+
+#ifdef __TARGET_RPI3__
+    out_word(TIMER_PREDIV, 0x7d);
+    out_word(TIMER_LOAD, 19841);
+    out_word(TIMER_CTL, 0b10100010);
+#endif
 }
 
 static void timer_interrupt_handler(void)
 {
+#ifdef __TARGET_QEMU__
     uint32_t status = read_timer_status();
     if (status & (1 << 2))
     {
@@ -40,6 +57,17 @@ static void timer_interrupt_handler(void)
         wake_up(-1);
         set_timer_interval(timer_interval);
     }
+#endif
+
+#ifdef __TAGERT_RPI3__
+    uint32_t mask = in_word(TIMER_MSKIRQ);
+    if (mask & 1)
+    {
+        ticks++;
+        wake_up(-1);
+        out_word(TIMER_ACK, 1);
+    }
+#endif
 }
 
 static uint32_t get_irq_number(void)
@@ -96,6 +124,7 @@ void handler(struct TrapFrame *tf)
         break;
 
     case 2:
+#ifdef __TARGET_QEMU__
         irq = in_word(CNTP_STATUS_EL0);
         if (irq & (1 << 1))
         {
@@ -117,6 +146,27 @@ void handler(struct TrapFrame *tf)
                 }
             }
         }
+#endif
+
+#ifdef __TARGET_RPI3__
+        irq = get_irq_number();
+        if (irq & 1)
+        {
+            timer_interrupt_handler();
+            schedule = 1;
+        }
+        else if (irq & (1 << 19))
+        {
+            uart_handler();
+        }
+        else
+        {
+            printk("unknown irq\r\n");
+            while (1)
+            {
+            }
+        }
+#endif
         break;
 
     case 3:

@@ -245,7 +245,7 @@ static const unsigned char font_data[224][16] =
 
 u32 font_get_height()
 {
-	return height + extraheight;
+	return height;
 }
 
 u32 font_get_width()

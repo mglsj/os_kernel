@@ -3,8 +3,6 @@
 #include "delays.h"
 #include "mem.h"
 
-extern char reserved_mem_start;
-
 dma_channel channels[15];
 
 static u16 channel_map = 0x1F35;
@@ -50,7 +48,7 @@ dma_channel *dma_open_channel(u32 channel)
     dma->channel = _channel;
 
     // LOW_MEMORY = bottom of RAM...  Hack for now since no allocate function
-    dma->block = (dma_control_block *)(&reserved_mem_start);
+    dma->block = (dma_control_block *)DMA_MEM_LOCATION;
     dma->block->res[0] = 0;
     dma->block->res[1] = 0;
 

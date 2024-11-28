@@ -58,13 +58,16 @@
 
 .section .text
 .global vector_table
+
+#ifdef __TARGET_QEMU__
 .global enable_timer
 .global read_timer_freq
 .global read_timer_status
 .global set_timer_interval
+.global pstart
+#endif
 .global enable_irq
 .global trap_return
-.global pstart
 .global swap
 
 .balign 0x800
@@ -161,6 +164,8 @@ error:
     mov x0, #0
     handler_entry
 
+#ifdef __TARGET_QEMU__
+
 read_timer_freq:
     mrs x0, CNTFRQ_EL0
     ret
@@ -186,6 +191,8 @@ enable_timer:
 read_timer_status:
     mrs x0, CNTP_CTL_EL0
     ret
+
+#endif
 
 enable_irq:
     msr daifclr, #2

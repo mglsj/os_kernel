@@ -82,6 +82,8 @@ loop2:
     cmp x0, x2
     blo loop2
 
+#ifdef __TARGET_QEMU__
+
     adr x0, pud_ttbr1
     add x0, x0, #(1 * 8)
     adr x1, pmd2_ttbr1
@@ -101,6 +103,7 @@ loop3:
     cmp x0, x2
     blo loop3
 
+#endif
 
 setup_uvm:
     adr x0, pgd_ttbr0
@@ -127,8 +130,11 @@ pud_ttbr1:
     .space 4096
 pmd_ttbr1:
     .space 4096
+
+#ifdef __TARGET_QEMU__
 pmd2_ttbr1:
     .space 4096
+#endif
 
 pgd_ttbr0:
     .space 4096

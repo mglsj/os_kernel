@@ -1,9 +1,9 @@
 #include "../memory.h"
 #include "../print.h"
+#include "_gato.h"
+#include "_homer.h"
+#include "_mbox.h"
 #include "delays.h"
-#include "gato.h"
-#include "homer.h"
-#include "mbox.h"
 
 unsigned int phy_width, phy_height, pitch, isrgb; /* dimensions and channel order */
 unsigned char *lfb;                               /* raw frame buffer address */

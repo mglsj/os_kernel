@@ -14,6 +14,27 @@
         "tuple": "c",
         "utility": "c",
         "variant": "c",
-        "locale": "c"
+        "locale": "c",
+        "chrono": "c",
+        "deque": "c",
+        "forward_list": "c",
+        "list": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "span": "c",
+        "text_encoding": "c",
+        "__bit_reference": "c",
+        "__hash_table": "c",
+        "__split_buffer": "c",
+        "__tree": "c",
+        "ios": "c",
+        "map": "c",
+        "set": "c",
+        "numbers": "c",
+        "sstream": "c",
+        "cstdint": "c"
     }
 }
