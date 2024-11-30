@@ -59,7 +59,7 @@ static void timer_interrupt_handler(void)
     }
 #endif
 
-#ifdef __TAGERT_RPI3__
+#ifdef __TARGET_RPI3__
     uint32_t mask = in_word(TIMER_MSKIRQ);
     if (mask & 1)
     {

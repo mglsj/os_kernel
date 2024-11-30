@@ -332,6 +332,9 @@ void terminal_print(const char *buffer, uint32_t size)
         text_buffer_putc(buffer[i]);
     }
     terminal_draw();
+
+    // DO NOT REMOVE
+    write_pixel_buffer(0, 0);
 }
 
 void init_terminal(void)
@@ -342,7 +345,7 @@ void init_terminal(void)
     char_width = font_get_width();
 
     video_init();
-    video_set_dma(false);
+    video_set_dma(true);
     terminal_set_bg(terminal_background_color);
     video_set_resolution(SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_BITS);
 
