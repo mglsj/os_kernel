@@ -345,7 +345,15 @@ void init_terminal(void)
     char_width = font_get_width();
 
     video_init();
+
+#ifdef __TARGET_QEMU__
+    video_set_dma(false);
+#endif
+
+#ifdef __TARGET_RPI3__
     video_set_dma(true);
+#endif
+
     terminal_set_bg(terminal_background_color);
     video_set_resolution(SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_BITS);
 
