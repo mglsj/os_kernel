@@ -332,9 +332,6 @@ void terminal_print(const char *buffer, uint32_t size)
         text_buffer_putc(buffer[i]);
     }
     terminal_draw();
-
-    // DO NOT REMOVE
-    write_pixel_buffer(terminal_pixel_buffer, 0);
 }
 
 void init_terminal(void)

@@ -107,7 +107,9 @@ void do_dma(void *dest, void *src, u32 total)
 void video_dma()
 {
     if (use_dma)
-        do_dma((void *)FRAMEBUFFER, (void *)DMABUFFER, fb_req.buff.screen_size);
+    {
+        return do_dma((void *)FRAMEBUFFER, (void *)DMABUFFER, fb_req.buff.screen_size);
+    }
 }
 
 typedef struct
@@ -177,6 +179,17 @@ void video_set_resolution(u32 xres, u32 yres, u32 bpp)
     // draw some text showing what resolution is...
 }
 
+static void do_video_dma()
+{
+    if (use_dma)
+        video_dma();
+
+#ifdef __TARGET_RPI3__
+    if (use_dma)
+        video_dma();
+#endif
+}
+
 void video_write_buffer(u32 dst_offset, void *src, u32 size)
 {
     size = min(size, fb_req.buff.screen_size);
@@ -184,7 +197,7 @@ void video_write_buffer(u32 dst_offset, void *src, u32 size)
     if (use_dma)
     {
         do_dma((void *)BUS_ADDR(vid_buffer) + dst_offset, src, size);
-        video_dma();
+        do_video_dma();
     }
     else
     {
@@ -224,4 +237,9 @@ void video_draw_pixel(u32 x, u32 y, u32 color)
         // DRAWBUFFER[pixel_offset++] = (color & 0xFF);
         DRAWBUFFER[pixel_offset] = (color & 0xFF);
     }
+}
+
+void video_draw_image(void *image, u32 size)
+{
+    video_write_buffer(0, image, size);
 }

@@ -24,8 +24,8 @@ SECTIONS
         bss_end = .;
     }
 
-    . = ALIGN(16);
     .reserved_mem : {
+        . = ALIGN(16);
         reserved_mem_start = .;
         . = . + 60M;
         reserved_mem_end = .;

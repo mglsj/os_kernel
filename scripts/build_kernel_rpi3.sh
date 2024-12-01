@@ -30,7 +30,7 @@ aarch64-linux-gnu-gcc -std=c99 -Wall -ffreestanding -fno-stack-protector -nostdl
     -c src/kernel/gpu/delays.c \
     -o build/kernel/gpu/delays.o \
     -D__TARGET_RPI3__
-aarch64-linux-gnu-gcc -std=c99 -Wall -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only \
+aarch64-linux-gnu-gcc -w -std=c99 -Wall -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only \
     -c src/kernel/gpu/video.c \
     -o build/kernel/gpu/video.o \
     -D__TARGET_RPI3__
