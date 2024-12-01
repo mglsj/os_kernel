@@ -12,11 +12,9 @@ int main(void)
 
     if (count != 0)
     {
-        int _ = printf("NAME    \tDIR\tFILE SIZE\r\n");
-        for (int i = 0; i < _; i++)
-        {
-            printf("-");
-        }
+        printf("NAME    \tDIR\tFILE SIZE\r\n");
+        printf("--------------------------------");
+
         printf("\r\n");
         for (int i = 0; i < count; i++)
         {
@@ -31,11 +29,11 @@ int main(void)
             memcpy(name, buffer[i].name, 8);
             if ((buffer[i].attributes & 0x10) == 0x10)
             {
-                printf("%s\tYES\t%ukb", name, (uint64_t)buffer[i].file_size / 1024);
+                printf("%s\tYES\t\t%ukb", name, (uint64_t)buffer[i].file_size / 1024);
             }
             else
             {
-                printf("%s\tNO\t%ukb", name, (uint64_t)buffer[i].file_size / 1024);
+                printf("%s\tNO\t\t%ukb", name, (uint64_t)buffer[i].file_size / 1024);
             }
             printf("\r\n");
         }

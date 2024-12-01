@@ -35,6 +35,9 @@
         "set": "c",
         "numbers": "c",
         "sstream": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "bitset": "c",
+        "queue": "c",
+        "stack": "c"
     }
 }

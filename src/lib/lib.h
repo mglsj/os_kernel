@@ -37,6 +37,11 @@ int exec(char *file_name);
 char keyboard_read(void);
 int read_root_directory(void *buffer);
 
+void presentation_show(void);
+void presentation_close(void);
+void presentation_next(void);
+void presentation_prev(void);
+
 void memset(void *dst, int value, unsigned int size);
 void memcpy(void *dst, void *src, unsigned int size);
 void memmove(void *dst, void *src, unsigned int size);

@@ -3,6 +3,7 @@
 #include "file.h"
 #include "handler.h"
 #include "keyboard.h"
+#include "presentation/presentation.h"
 #include "print.h"
 #include "process.h"
 #include "stddef.h"
@@ -94,13 +95,36 @@ static int sys_read_root_directory(int64_t *argptr)
     return read_root_directory((char *)argptr[0]);
 }
 
+// ppt
+
+static int sys_ppt_show(int64_t *argptr)
+{
+    presentation_show();
+    return 0;
+}
+static int sys_ppt_close(int64_t *argptr)
+{
+    presentation_close();
+    return 0;
+}
+static int sys_ppt_next(int64_t *argptr)
+{
+    presentation_next();
+    return 0;
+}
+static int sys_ppt_prev(int64_t *argptr)
+{
+    presentation_prev();
+    return 0;
+}
+
 void system_call(struct TrapFrame *tf)
 {
     int64_t i = tf->x8;
     int64_t param_count = tf->x0;
     int64_t *argptr = (int64_t *)tf->x1;
 
-    if (param_count < 0 || i < 0 || i > 11)
+    if (param_count < 0 || i < 0 || i > 15)
     {
         tf->x0 = -1;
         return;
@@ -123,4 +147,9 @@ void init_system_call(void)
     system_calls[9] = sys_exec;
     system_calls[10] = sys_keyboard_read;
     system_calls[11] = sys_read_root_directory;
+
+    system_calls[12] = sys_ppt_show;
+    system_calls[13] = sys_ppt_close;
+    system_calls[14] = sys_ppt_next;
+    system_calls[15] = sys_ppt_prev;
 }

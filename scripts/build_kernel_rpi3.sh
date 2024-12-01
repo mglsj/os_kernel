@@ -3,6 +3,7 @@ echo -e "${BIYellow}[DEBUG] Building Kernel${Color_Off}"
 rm -rf build/kernel
 mkdir build/kernel
 mkdir build/kernel/gpu
+mkdir build/kernel/presentation
 
 echo "[DEBUG] Assembling Kernel"
 # Assemble boot.s lib.s handler.s mmu.s
@@ -51,6 +52,12 @@ aarch64-linux-gnu-gcc -std=c99 -Wall -ffreestanding -fno-stack-protector -nostdl
     -o build/kernel/gpu/terminal.o \
     -D__TARGET_RPI3__
 
+echo "[DEBUG] Compiling Presentation"
+aarch64-linux-gnu-gcc -std=c99 -Wall -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mgeneral-regs-only \
+    -c src/kernel/presentation/presentation.c \
+    -o build/kernel/presentation/presentation.o \
+    -D__TARGET_RPI3__
+
 echo "[DEBUG] Linking Kernel"
 # Link all the files
 aarch64-linux-gnu-ld -nostdlib -T src/kernel/link.lds \
@@ -75,7 +82,8 @@ aarch64-linux-gnu-ld -nostdlib -T src/kernel/link.lds \
     build/kernel/gpu/mailbox.o \
     build/kernel/gpu/fonts.o \
     build/kernel/gpu/dma.o \
-    build/kernel/gpu/terminal.o
+    build/kernel/gpu/terminal.o \
+    build/kernel/presentation/presentation.o
 
 echo "[DEBUG] Converting Kernel"
 # Convert the linked file to binary

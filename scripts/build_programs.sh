@@ -9,3 +9,6 @@ source scripts/programs/build_test.sh
 source scripts/programs/build_init.sh
 source scripts/programs/build_console.sh
 source scripts/programs/build_ls.sh
+source scripts/programs/build_ppt.sh
+source scripts/programs/build_clear.sh
+source scripts/programs/build_neofetch.sh

@@ -13,8 +13,10 @@ u32 terminal_text_color = SCREEN_FOREGROUND;
 
 #define TAB_WIDTH 8
 
+// 4 : 3
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
+
 #define COLOR_BITS 32
 #define FRAME_BUFFER_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT * (COLOR_BITS >> 3))
 
@@ -238,10 +240,25 @@ static u32 draw_pixel_buffer()
                             ansi_escape_sequence = false;
                         }
                     }
-                    if (ch == '[')
+                    else
                     {
-                        ansi_control_sequence = true;
-                        ansi_control_code = -1;
+                        switch (ch)
+                        {
+                        case '[':
+                            ansi_control_sequence = true;
+                            ansi_control_code = -1;
+                            break;
+                        case 'c':
+                            y = 0;
+                            lines_written = 0;
+                            x = OFFSET_LEFT;
+                            column = 0;
+                            ansi_escape_sequence = false;
+                            terminal_clear();
+                            break;
+                        default:
+                            break;
+                        }
                     }
                 }
                 else if ((0x20 <= ch && ch <= 0x7F) || (0xA0 <= ch && ch <= 0xFF))
@@ -302,6 +319,7 @@ void terminal_set_bg(uint32_t color)
 
 void terminal_clear()
 {
+    text_buffer.start = text_buffer.end = text_buffer.cursor = 0;
     video_clear_screen();
 }
 
@@ -355,6 +373,5 @@ void init_terminal(void)
     video_set_resolution(SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_BITS);
 
     terminal_print("Hello from \033[1;31mRaspberry\033[0m \033[1;32mpi\033[0m\r\n\r\n", 49);
-
     terminal_initialized = true;
 }

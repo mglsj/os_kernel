@@ -182,12 +182,10 @@ void video_set_resolution(u32 xres, u32 yres, u32 bpp)
 static void do_video_dma()
 {
     if (use_dma)
+    {
+        do_dma((void *)BUS_ADDR(vid_buffer) + 0, 0, 0);
         video_dma();
-
-#ifdef __TARGET_RPI3__
-    if (use_dma)
-        video_dma();
-#endif
+    }
 }
 
 void video_write_buffer(u32 dst_offset, void *src, u32 size)
@@ -197,12 +195,16 @@ void video_write_buffer(u32 dst_offset, void *src, u32 size)
     if (use_dma)
     {
         do_dma((void *)BUS_ADDR(vid_buffer) + dst_offset, src, size);
-        do_video_dma();
+        video_dma();
     }
     else
     {
         memcpy((void *)FRAMEBUFFER + dst_offset, src, size);
     }
+
+#ifdef __TARGET_RPI3__
+    do_video_dma();
+#endif
 }
 
 void video_clear_screen()

@@ -151,3 +151,37 @@ read_root_directory:
 
     add sp, sp, #8
     ret
+
+
+.global presentation_show
+.global presentation_close
+.global presentation_next
+.global presentation_prev
+
+presentation_show:
+    mov x8, #12
+    mov x0, #0
+
+    svc #1234
+    ret
+
+presentation_close:
+    mov x8, #13
+    mov x0, #0
+
+    svc #1234
+    ret
+
+presentation_next:
+    mov x8, #14
+    mov x0, #0
+
+    svc #1234
+    ret
+
+presentation_prev:
+    mov x8, #15
+    mov x0, #0
+
+    svc #1234
+    ret
